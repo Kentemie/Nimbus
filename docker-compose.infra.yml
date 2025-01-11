@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: nimbus-vault
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+    networks:
+      - nimbus-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: nimbus-blitz
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - nimbus-network
+
+  kafka:
+    build:
+      context: ./setup
+      dockerfile: Dockerfile.kafka
+    image: nimbus/kafka:latest
+    container_name: nimbus-flow
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    volumes:
+      - "kafka_data:/bitnami/kafka"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - nimbus-network
+
+volumes:
+  postgres_data:
+  kafka_data:
+
+networks:
+  nimbus-network:
+    external: true

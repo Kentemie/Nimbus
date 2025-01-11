@@ -1,0 +1,25 @@
+# Базовый образ с Kafka от Bitnami
+FROM bitnami/kafka:latest
+
+# Выполнение команд от имени пользователя root для установки пакетов и настройки
+USER root
+
+# Обновляем список пакетов и устанавливаем netcat без лишних зависимостей, затем очищаем кэш apt
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends netcat-openbsd && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Копируем скрипт для создания топиков в контейнер
+COPY scripts/create-topics.sh /usr/local/bin/create-topics.sh
+# Делаем скрипт исполняемым
+RUN chmod +x /usr/local/bin/create-topics.sh
+
+# Копируем пользовательский скрипт для переопределения точки входа
+# Этот скрипт выполнится при старте контейнера для выполнения дополнительных действий (например, создания топиков)
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+# Делаем скрипт исполняемым
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Переопределяем точку входа контейнера на наш пользовательский скрипт
+ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
