@@ -22,7 +22,7 @@ class PostgresManager:
             expire_on_commit=False,
         )
 
-    async def session(self) -> AsyncGenerator[AsyncSession, None]:
+    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         async with self._session_factory() as session:
             yield session
 
