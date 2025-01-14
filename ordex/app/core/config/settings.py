@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .app import AppConfig
 from .database import DatabaseConfig
+from .auth import AuthenticationConfig
 
 
 class Settings(BaseSettings):
@@ -16,4 +17,5 @@ class Settings(BaseSettings):
     )
 
     APP: AppConfig
+    AUTH: AuthenticationConfig
     DATABASE: DatabaseConfig
