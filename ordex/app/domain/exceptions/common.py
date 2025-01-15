@@ -27,5 +27,5 @@ class RecordAlreadyExistsException(NimbusException):
 
 class RecordNotFoundException(NimbusException):
     def __init__(self, identifier: Optional[int | str] = None):
-        message = f"Запись {'с идентификатором ' + identifier if identifier else ''} не найдена."
+        message = f"Запись {'с идентификатором ' + str(identifier) if identifier else ''} не найдена."
         super().__init__(message, details={"identifier": identifier})

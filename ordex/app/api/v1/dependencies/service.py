@@ -2,10 +2,12 @@ from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 
+from repositories.redis import OrderCacheRepository
 from .repository import (
     get_user_repository,
     get_role_repository,
-    get_order_repository,
+    get_order_db_repository,
+    get_order_cache_repository,
     get_product_repository,
 )
 
@@ -31,9 +33,12 @@ def get_role_service(
 
 
 def get_order_service(
-    order_repository: Annotated[OrderRepository, Depends(get_order_repository)]
+    order_db_repository: Annotated[OrderDBRepository, Depends(get_order_db_repository)],
+    order_cache_repository: Annotated[
+        OrderCacheRepository, Depends(get_order_cache_repository)
+    ],
 ) -> AsyncGenerator[OrderService, None]:
-    yield OrderService(order_repository)
+    yield OrderService(order_db_repository, order_cache_repository)
 
 
 def get_product_service(

@@ -2,14 +2,14 @@ from typing import Optional, Any
 from datetime import datetime, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update, delete
 from sqlalchemy.orm import selectinload
 
 from domain.models import Order, OrderProduct as OrderProductModel
 from domain.schemas import OrderFilter
 
 
-class OrderRepository:
+class OrderDBRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -21,7 +21,7 @@ class OrderRepository:
                 Order.deleted_at.is_(None),
             )
             .options(
-                selectinload(Order.order_products).selectinload(
+                selectinload(Order.order_products).joinedload(
                     OrderProductModel.product
                 ),
             )
@@ -71,11 +71,16 @@ class OrderRepository:
 
         return order
 
-    async def soft_delete(self, order: Order) -> None:
-        order.deleted_at = datetime.now(timezone.utc)
-        self.session.add(order)
+    async def soft_delete(self, order_id: int) -> None:
+        stmt = (
+            update(Order)
+            .where(Order.id == order_id)
+            .values(deleted_at=datetime.now(timezone.utc))
+        )
+        await self.session.execute(stmt)
         await self.session.commit()
 
-    async def hard_delete(self, order: Order) -> None:
-        await self.session.delete(order)
+    async def hard_delete(self, order_id: int) -> None:
+        stmt = delete(Order).where(Order.id == order_id)
+        await self.session.execute(stmt)
         await self.session.commit()

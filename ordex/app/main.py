@@ -8,15 +8,18 @@ from fastapi.responses import ORJSONResponse
 from api import api_manager
 
 from core.config import settings
-from core.infrastructure import postgres_manager
+from core.infrastructure import postgres_manager, redis_manager, kafka_manager
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     # startup
+    await kafka_manager.start()
     yield
     # shutdown
     await postgres_manager.dispose()
+    await redis_manager.close()
+    await kafka_manager.stop()
 
 
 app = FastAPI(

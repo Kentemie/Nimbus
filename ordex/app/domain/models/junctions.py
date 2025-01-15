@@ -79,4 +79,5 @@ class OrderProduct(Base):
     product: Mapped["Product"] = relationship(
         argument="Product",
         back_populates="order_products",
+        lazy="joined",
     )

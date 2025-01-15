@@ -4,8 +4,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .api import ApiConfig
 from .app import AppConfig
-from .database import DatabaseConfig
 from .auth import AuthenticationConfig
+from .database import DatabaseConfig
+from .kafka import KafkaConfig
+from .redis import RedisConfig
 
 
 class Settings(BaseSettings):
@@ -21,3 +23,5 @@ class Settings(BaseSettings):
     APP: AppConfig
     AUTH: AuthenticationConfig
     DATABASE: DatabaseConfig
+    REDIS: RedisConfig
+    KAFKA: KafkaConfig

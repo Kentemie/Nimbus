@@ -93,7 +93,7 @@ def get_orders_router(
     async def get_order(
         order: Annotated[OrderModel, Depends(get_order_or_404)],
     ):
-        return OrderSchema.model_validate(order)
+        return order
 
     @router.get(
         "",
@@ -115,8 +115,7 @@ def get_orders_router(
         Получить все «живые» (не удалённые) заказы пользователя.
         """
         user, _ = user_token
-        orders = await order_service.get_filtered(user.id, order_filter)
-        return [OrderSchema.model_validate(o) for o in orders]
+        return await order_service.get_filtered(user.id, order_filter)
 
     @router.post(
         "",
@@ -132,7 +131,7 @@ def get_orders_router(
     ):
         user, _ = user_token
         created_order = await order_service.create(user.id, order_create)
-        return OrderSchema.model_validate(created_order)
+        return created_order
 
     @router.put(
         "/{order_id}",
@@ -141,22 +140,27 @@ def get_orders_router(
         responses={
             **update_bad_response,
             **unauthorized_response,
+            **not_found_response,
         },
         dependencies=[Depends(get_current_jwt_user)],
         name="orders:update_order",
     )
     async def update_order(
         order_service: Annotated[OrderService, Depends(get_order_service)],
+        order_id: int,
         order_update: OrderUpdate,
-        order: Annotated[OrderModel, Depends(get_order_or_404)],
     ):
         try:
-            updated_order = await order_service.update(order_update, order)
-            return OrderSchema.model_validate(updated_order)
+            return await order_service.update(order_id, order_update)
         except OrderIsConfirmedException:
             return HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=ErrorCode.ORDER_IS_CONFIRMED,
+            )
+        except RecordNotFoundException:
+            return HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=ErrorCode.RECORD_NOT_FOUND,
             )
 
     @router.delete(
@@ -165,16 +169,15 @@ def get_orders_router(
         responses={
             **unauthorized_response,
             **forbidden_response,
-            **not_found_response,
         },
         dependencies=[Depends(get_current_jwt_admin_user)],
         name="orders:soft_delete_order",
     )
     async def soft_delete_order(
         order_service: Annotated[OrderService, Depends(get_order_service)],
-        order: Annotated[OrderModel, Depends(get_order_or_404)],
+        order_id: int,
     ):
-        await order_service.soft_delete(order)
+        await order_service.soft_delete(order_id)
         return None
 
     return router

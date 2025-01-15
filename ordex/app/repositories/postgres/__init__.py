@@ -1,12 +1,12 @@
 __all__ = [
     "UserRepository",
     "RoleRepository",
-    "OrderRepository",
+    "OrderDBRepository",
     "ProductRepository",
 ]
 
 
 from .user import UserRepository
 from .role import RoleRepository
-from .order import OrderRepository
+from .order import OrderDBRepository
 from .product import ProductRepository
