@@ -9,11 +9,13 @@ from api import api_manager
 
 from core.config import settings
 from core.infrastructure import postgres_manager, redis_manager, kafka_manager
+from core.stats import setup_logging
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     # startup
+    setup_logging(env=settings.APP.ENVIRONMENT)
     await kafka_manager.start()
     yield
     # shutdown
