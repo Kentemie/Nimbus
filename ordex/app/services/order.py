@@ -6,6 +6,7 @@ from domain.models import Order as OrderModel, OrderProduct
 from domain.schemas import Order as OrderSchema, OrderCreate, OrderUpdate, OrderFilter
 from repositories.postgres import OrderDBRepository
 from repositories.redis import OrderCacheRepository
+from .events import send_order_status_update_event
 
 
 class OrderService:
@@ -20,7 +21,6 @@ class OrderService:
     async def get_by_id(self, order_id: int) -> OrderSchema:
         cached_data = await self.order_cache_repository.get(order_id)
         if cached_data is not None:
-            print("Got from cache")
             return OrderSchema(**cached_data)
 
         order_model = await self._fetch_order_or_raise(order_id)
@@ -55,13 +55,23 @@ class OrderService:
         if order_model.status == OrderStatus.CONFIRMED:
             raise OrderIsConfirmedException(order_model.id)
 
+        original_status = order_model.status
+
         order_dict = order_update.get_create_update_dict()
         self._convert_order_products(order_dict)
 
-        updated_order_model = await self.order_db_repository.update(
-            order_model, order_dict
-        )
-        return await self._update_cache_and_serialize(updated_order_model)
+        await self.order_db_repository.update(order_model, order_dict)
+
+        updated_status = order_model.status
+
+        if original_status != updated_status:
+            await send_order_status_update_event(
+                order_id,
+                original_status,
+                updated_status,
+            )
+
+        return await self._update_cache_and_serialize(order_model)
 
     async def soft_delete(self, order_id: int) -> None:
         await self.order_db_repository.soft_delete(order_id)
@@ -78,7 +88,6 @@ class OrderService:
         return order_model
 
     async def _update_cache_and_serialize(self, order_model: OrderModel) -> OrderSchema:
-        print("Updating cache")
         order_schema = OrderSchema.model_validate(order_model)
         await self.order_cache_repository.set(
             order_schema.id, order_schema.model_dump()

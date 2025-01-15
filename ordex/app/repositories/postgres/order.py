@@ -60,7 +60,7 @@ class OrderDBRepository:
 
         return order
 
-    async def update(self, order: Order, update_dict: dict[str, Any]) -> Order:
+    async def update(self, order: Order, update_dict: dict[str, Any]) -> None:
         for key, value in update_dict.items():
             setattr(order, key, value)
 
@@ -68,8 +68,6 @@ class OrderDBRepository:
 
         await self.session.commit()
         await self.session.refresh(order)
-
-        return order
 
     async def soft_delete(self, order_id: int) -> None:
         stmt = (
