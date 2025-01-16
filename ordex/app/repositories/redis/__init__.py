@@ -1,4 +1,4 @@
-__all__ = ["OrderCacheRepository"]
+__all__ = ["CacheRepository"]
 
 
-from .order import OrderCacheRepository
+from .cache import CacheRepository

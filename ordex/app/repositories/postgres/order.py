@@ -9,7 +9,7 @@ from domain.models import Order, OrderProduct as OrderProductModel
 from domain.schemas import OrderFilter
 
 
-class OrderDBRepository:
+class OrderRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 

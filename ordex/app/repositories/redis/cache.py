@@ -4,24 +4,26 @@ from typing import Any
 from redis.asyncio import Redis
 
 
-class OrderCacheRepository:
+class CacheRepository:
     def __init__(self, redis: Redis):
         self._redis = redis
 
-    async def get(self, order_id: int) -> dict[str, Any] | None:
-        key = self._generate_key(order_id)
+    async def get(self, prefix: str, identifier: str | int) -> dict[str, Any] | None:
+        key = self._generate_key(prefix, identifier)
         data = await self._redis.get(key)
         if data is None:
             return None
         return json.loads(data)
 
-    async def set(self, order_id: int, data: dict[str, Any]) -> None:
-        key = self._generate_key(order_id)
+    async def set(
+        self, prefix: str, identifier: str | int, data: dict[str, Any]
+    ) -> None:
+        key = self._generate_key(prefix, identifier)
         await self._redis.set(key, json.dumps(data))
 
     async def delete(self, order_id: int) -> None:
         key = self._generate_key(order_id)
         await self._redis.delete(key)
 
-    def _generate_key(self, order_id: int) -> str:  # noqa
-        return f"order:{order_id}"
+    def _generate_key(self, prefix: str, identifier: str | int) -> str:  # noqa
+        return f"{prefix}:{identifier}"
