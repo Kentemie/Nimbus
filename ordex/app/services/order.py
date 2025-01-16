@@ -106,13 +106,13 @@ class OrderService:
     async def soft_delete(self, order_id: int) -> None:
         logger.info("Soft deleting order with ID: %s", order_id)
         await self.order_repository.soft_delete(order_id)
-        await self.cache_repository.delete(order_id)
+        await self.cache_repository.delete(CACHE_PREFIX, order_id)
         logger.info("Order with ID: %s soft deleted.", order_id)
 
     async def hard_delete(self, order_id: int) -> None:
         logger.info("Hard deleting order with ID: %s", order_id)
         await self.order_repository.hard_delete(order_id)
-        await self.cache_repository.delete(order_id)
+        await self.cache_repository.delete(CACHE_PREFIX, order_id)
         logger.info("Order with ID: %s hard deleted.", order_id)
 
     async def _fetch_order_or_raise(self, order_id: int) -> OrderModel:

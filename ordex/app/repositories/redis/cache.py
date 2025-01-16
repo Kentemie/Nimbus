@@ -21,8 +21,14 @@ class CacheRepository:
         key = self._generate_key(prefix, identifier)
         await self._redis.set(key, json.dumps(data))
 
-    async def delete(self, order_id: int) -> None:
-        key = self._generate_key(order_id)
+    async def delete(self, prefix: str, identifier: str | int) -> None:
+        """
+        Удаляет данные из кеша по ключу.
+
+        :param prefix: Префикс ключа.
+        :param identifier: Идентификатор для генерации ключа.
+        """
+        key = self._generate_key(prefix, identifier)
         await self._redis.delete(key)
 
     def _generate_key(self, prefix: str, identifier: str | int) -> str:  # noqa
