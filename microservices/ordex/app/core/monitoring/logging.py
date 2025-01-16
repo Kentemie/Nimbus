@@ -18,6 +18,7 @@ def setup_logging(env: str, logs_dir: str, name: Optional[str] = None) -> None:
     root_logger.setLevel(logging.INFO) if env == 'production' else root_logger.setLevel(logging.DEBUG)
 
     logs_dir = Path(logs_dir)
+    logs_dir.mkdir(exist_ok=True)
     logs_file = logs_dir / "app.log"
 
     # Добавляем обработчик ротации
