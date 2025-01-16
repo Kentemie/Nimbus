@@ -1,5 +1,11 @@
 def camel_case_to_snake_case(input_str: str) -> str:
     """
+    Преобразует строку из CamelCase в snake_case.
+
+    :param input_str: Строка в формате CamelCase.
+    :return: Строка в формате snake_case.
+
+    Примеры:
     >>> camel_case_to_snake_case("SomeSDK")
     'some_sdk'
     >>> camel_case_to_snake_case("RServoDrive")

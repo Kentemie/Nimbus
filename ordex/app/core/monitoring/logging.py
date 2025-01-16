@@ -5,6 +5,15 @@ from typing import Optional
 
 
 def setup_logging(env: str, logs_dir: str, name: Optional[str] = None) -> None:
+    """
+    Настраивает логирование для приложения с поддержкой ротации логов.
+
+    :param env: Среда выполнения приложения (например, 'development' или 'production').
+                Определяет уровень логирования (DEBUG для разработки, INFO для продакшена).
+    :param logs_dir: Директория для сохранения логов.
+    :param name: Имя логгера (опционально, по умолчанию используется корневой логгер).
+    """
+
     root_logger = logging.getLogger(name)
     root_logger.setLevel(logging.INFO) if env == 'production' else root_logger.setLevel(logging.DEBUG)
 

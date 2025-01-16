@@ -4,18 +4,34 @@ from .dependencies import Authenticator, get_user_service
 from .routers import *
 
 from core.authentication import AuthenticationBackend
-from core.authentication.transports import bearer_transport
-from core.authentication.strategies import jwt_strategy
+from core.authentication.transports import Transport
+from core.authentication.strategies import Strategy
 from core.config import settings
 
 
 class Handler:
-    def __init__(self) -> None:
+    """
+    Управляет настройкой маршрутов для версии API v1.
+
+    :param name: Название бэкенда аутентификации.
+    :param transport: Транспорт для работы с токенами.
+    :param strategy: Стратегия генерации и валидации токенов.
+
+    Маршруты:
+    - Аутентификация и регистрация: Login, Register, Verify, Reset Password.
+    - Управление пользователями и ролями: Users, User Roles.
+    - Работа с заказами и продуктами: Orders, Products.
+
+    Методы:
+    - `get_router`: Возвращает маршрутизатор для API v1.
+    """
+
+    def __init__(self, name: str, transport: Transport, strategy: Strategy) -> None:
         self._router = APIRouter(prefix=settings.API.V1.PREFIX)
         self._auth_backend = AuthenticationBackend(
-            name="BEARER_JWT",
-            transport=bearer_transport,
-            strategy=jwt_strategy,
+            name=name,
+            transport=transport,
+            strategy=strategy,
         )
 
         self._authenticator = Authenticator(
@@ -26,6 +42,11 @@ class Handler:
         self._gather_routers()
 
     def _gather_routers(self) -> None:
+        """
+        Собирает и включает маршрутизаторы для различных функций API v1.
+
+        :return: None
+        """
         self._router.include_router(
             router=get_auth_router(
                 prefix=settings.API.V1.AUTH,
@@ -89,4 +110,9 @@ class Handler:
         )
 
     def get_router(self) -> APIRouter:
+        """
+        Возвращает маршрутизатор с настроенными маршрутами API v1.
+
+        :return: Маршрутизатор FastAPI.
+        """
         return self._router

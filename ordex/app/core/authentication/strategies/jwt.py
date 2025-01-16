@@ -16,6 +16,21 @@ from core.config import settings
 
 
 class JWTStrategy(Strategy):
+    """
+    Реализует стратегию работы с JWT токенами для аутентификации.
+
+    :param secret_key: Секретный ключ для подписания токенов.
+    :param public_key: Публичный ключ для проверки подписи токенов.
+    :param algorithm: Алгоритм шифрования (например, "HS256").
+    :param lifetime: Время жизни токена в секундах.
+    :param audience: Список допустимых значений "aud" в токене.
+
+    Методы:
+    - `write_token`: Генерация токена для пользователя.
+    - `read_token`: Декодирование и проверка токена.
+    - `destroy_token`: Вызывает исключение, так как метод не поддерживается.
+    """
+
     def __init__(
         self,
         secret_key: SecretStr,
@@ -35,6 +50,12 @@ class JWTStrategy(Strategy):
         self.audience = audience
 
     async def write_token(self, user_model: UserModel) -> str:
+        """
+        Генерирует JWT токен для пользователя.
+
+        :param user_model: Модель пользователя.
+        :return: Сгенерированный токен.
+        """
         user_schema = UserSchema.model_validate(user_model)
         payload = {
             "sub": f"{user_model.id}:{user_model.email}",
@@ -50,6 +71,12 @@ class JWTStrategy(Strategy):
         return encode_jwt(payload, self.secret_key, self.algorithm)
 
     async def read_token(self, token: Optional[str]) -> Optional[UserSchema]:
+        """
+        Декодирует и проверяет JWT токен.
+
+        :param token: JWT токен.
+        :return: Схема пользователя или None, если токен недействителен.
+        """
         if token is None:
             return None
 
@@ -72,6 +99,12 @@ class JWTStrategy(Strategy):
             return None
 
     async def destroy_token(self, token: str) -> None:
+        """
+        Вызывает исключение, так как уничтожение токенов не поддерживается.
+
+        :param token: JWT токен.
+        :raises JWTStrategyDestroyTokenNotSupportedException: Метод не поддерживается.
+        """
         raise JWTStrategyDestroyTokenNotSupportedException()
 
 

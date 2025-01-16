@@ -17,6 +17,21 @@ CACHE_PREFIX = "order"
 
 
 class OrderService:
+    """
+    Сервис для работы с заказами.
+
+    :param order_repository: Репозиторий заказов.
+    :param cache_repository: Репозиторий кеша.
+
+    Методы:
+    - `get_by_id`: Получение заказа по ID.
+    - `get_filtered`: Получение заказов пользователя с фильтрацией.
+    - `create`: Создание нового заказа.
+    - `update`: Обновление существующего заказа.
+    - `soft_delete`: Логическое удаление заказа.
+    - `hard_delete`: Полное удаление заказа.
+    """
+
     def __init__(
         self,
         order_repository: OrderRepository,
@@ -26,6 +41,13 @@ class OrderService:
         self.cache_repository = cache_repository
 
     async def get_by_id(self, order_id: int) -> OrderSchema:
+        """
+        Получает заказ по ID.
+
+        :param order_id: Идентификатор заказа.
+        :return: Схема заказа.
+        :raises RecordNotFoundException: Если заказ не найден.
+        """
         logger.info("Fetching order with ID: %s", order_id)
         cached_data = await self.cache_repository.get(CACHE_PREFIX, order_id)
         if cached_data is not None:
@@ -41,6 +63,13 @@ class OrderService:
         user_id: int,
         order_filter: OrderFilter,
     ) -> list[OrderSchema]:
+        """
+        Получает список заказов с применением фильтрации.
+
+        :param user_id: Идентификатор пользователя.
+        :param order_filter: Фильтры для поиска заказов.
+        :return: Список заказов.
+        """
         logger.info(
             "Fetching orders for user ID: %s with filters: %s",
             user_id,
@@ -53,6 +82,13 @@ class OrderService:
         return [OrderSchema.model_validate(om) for om in order_models]
 
     async def create(self, user_id: int, order_create: OrderCreate) -> OrderSchema:
+        """
+        Создаёт новый заказ.
+
+        :param user_id: Идентификатор пользователя.
+        :param order_create: Данные для создания заказа.
+        :return: Схема созданного заказа.
+        """
         logger.info("Creating new order for user ID: %s", user_id)
         order_dict = order_create.get_create_update_dict()
         order_dict["user_id"] = user_id
@@ -68,6 +104,14 @@ class OrderService:
         order_id: int,
         order_update: OrderUpdate,
     ) -> OrderSchema:
+        """
+        Обновляет существующий заказ.
+
+        :param order_id: Идентификатор заказа.
+        :param order_update: Данные для обновления заказа.
+        :return: Схема обновлённого заказа.
+        :raises RecordNotFoundException: Если заказ не найден.
+        """
         logger.info("Updating order with ID: %s", order_id)
         order_model = await self._fetch_order_or_raise(order_id)
         if order_model.status == OrderStatus.CONFIRMED:
@@ -104,12 +148,22 @@ class OrderService:
         return await self._update_cache_and_serialize(order_model)
 
     async def soft_delete(self, order_id: int) -> None:
+        """
+        Логически удаляет заказ.
+
+        :param order_id: Идентификатор заказа.
+        """
         logger.info("Soft deleting order with ID: %s", order_id)
         await self.order_repository.soft_delete(order_id)
         await self.cache_repository.delete(CACHE_PREFIX, order_id)
         logger.info("Order with ID: %s soft deleted.", order_id)
 
     async def hard_delete(self, order_id: int) -> None:
+        """
+        Полностью удаляет заказ.
+
+        :param order_id: Идентификатор заказа.
+        """
         logger.info("Hard deleting order with ID: %s", order_id)
         await self.order_repository.hard_delete(order_id)
         await self.cache_repository.delete(CACHE_PREFIX, order_id)
