@@ -8,7 +8,7 @@ from domain.models import Order as OrderModel, OrderProduct
 from domain.schemas import Order as OrderSchema, OrderCreate, OrderUpdate, OrderFilter
 from repositories.postgres import OrderDBRepository
 from repositories.redis import OrderCacheRepository
-from .events import send_order_status_update_event
+from events import send_order_status_update_event
 
 
 logger = logging.getLogger()
