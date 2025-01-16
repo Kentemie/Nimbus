@@ -1,0 +1,13 @@
+services:
+  event-listener:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nimbus-event-listener
+    restart: always
+    networks:
+      - nimbus-network
+
+networks:
+  nimbus-network:
+    external: true
