@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .v1 import Handler as ApiV1Handler
+from .v1 import Handler as V1Handler
 
 from core.config import settings
 
@@ -12,9 +12,9 @@ class ApiManager:
         self._include_v1_router()
 
     def _include_v1_router(self) -> None:
-        api_v1_handler = ApiV1Handler()
+        v1_handler = V1Handler()
 
-        self._router.include_router(api_v1_handler.get_router())
+        self._router.include_router(v1_handler.get_router())
 
     def get_router(self) -> APIRouter:
         return self._router

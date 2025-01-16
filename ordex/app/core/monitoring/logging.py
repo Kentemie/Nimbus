@@ -4,13 +4,11 @@ from pathlib import Path
 from typing import Optional
 
 
-def setup_logging(env: str, name: Optional[str] = None) -> None:
+def setup_logging(env: str, logs_dir: str, name: Optional[str] = None) -> None:
     root_logger = logging.getLogger(name)
     root_logger.setLevel(logging.INFO) if env == 'production' else root_logger.setLevel(logging.DEBUG)
 
-    logs_dir = Path("logs")
-    logs_dir.mkdir(parents=True, exist_ok=True)
-
+    logs_dir = Path(logs_dir)
     logs_file = logs_dir / "app.log"
 
     # Добавляем обработчик ротации

@@ -8,3 +8,4 @@ class AppConfig(BaseModel):
     PORT: int
 
     ENVIRONMENT: Literal["staging", "production"] = "staging"
+    LOGS_DIR: str = "logs"
