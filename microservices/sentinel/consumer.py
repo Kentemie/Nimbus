@@ -11,7 +11,7 @@ LOG_FILE = LOGS_DIR / "kafka_consumer.log"
 async def consume():
     consumer = AIOKafkaConsumer(
         "ordex",
-        bootstrap_servers="localhost:9094",
+        bootstrap_servers="kafka:9094",
         group_id="my-group-1",
         session_timeout_ms=10000,
         request_timeout_ms=305000,

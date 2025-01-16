@@ -1,0 +1,19 @@
+services:
+  ordex:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/ordex
+    container_name: nimbus-ordex
+    restart: always
+    env_file:
+      - app/ordex.env
+    ports:
+      - "8000:8000"
+    networks:
+      - nimbus-network
+
+networks:
+  nimbus-network:
+    external: true
